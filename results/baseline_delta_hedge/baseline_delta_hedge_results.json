@@ -1,8 +1,8 @@
 {
   "strategy": "BlackScholesDeltaHedge",
-  "mean_pnl": -0.9606228859230143,
-  "std_pnl": 14.885812243421034,
-  "mean_hedging_error": 10.89246097363807,
+  "mean_pnl": 2.254859932237627,
+  "std_pnl": 1.333274210757725,
+  "mean_hedging_error": 1.333274210757725,
   "mean_transaction_costs": 0.5187454844705087,
-  "success_rate": 0.635
+  "success_rate": 0.977
 }

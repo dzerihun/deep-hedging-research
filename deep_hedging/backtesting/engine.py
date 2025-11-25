@@ -228,8 +228,6 @@ class BacktestEngine:
 
         # Initialize state
         current_position = 0.0
-        cumulative_pnl = 0.0
-        cumulative_costs = 0.0
         num_rebalances = 0
         last_rebalance_time = 0.0
 
@@ -244,8 +242,9 @@ class BacktestEngine:
             q=self.market_config.dividend_yield
         )
 
-        # Start with option premium (we sold the option)
-        cumulative_pnl = initial_option_price
+        # Self-financing portfolio: cash account starts with option premium
+        cash_account = initial_option_price
+        cumulative_costs = 0.0
 
         # Step through time
         for t in range(num_steps + 1):
@@ -272,13 +271,17 @@ class BacktestEngine:
                     option_type=self.market_config.option_type
                 )
 
+            # Calculate current P&L for state
+            portfolio_value = cash_account + current_position * spot_price
+            current_pnl = portfolio_value - option_price
+
             # Create market state
             state = MarketState(
                 spot_price=spot_price,
                 time_to_maturity=max(time_to_maturity, 0),
                 current_position=current_position,
                 option_price=option_price,
-                pnl=cumulative_pnl
+                pnl=current_pnl
             )
 
             # Check if we should rebalance
@@ -292,7 +295,11 @@ class BacktestEngine:
                 # Compute hedge action
                 action = strategy.compute_hedge(state)
 
-                # Execute trade
+                # Execute trade in self-financing way
+                # When we trade, cash changes by: -trade_size * spot_price - transaction_cost
+                trade_cash_flow = -action.trade_size * spot_price
+                cash_account += trade_cash_flow  # Negative if buying, positive if selling
+                cash_account -= action.transaction_cost  # Always reduces cash
                 cumulative_costs += action.transaction_cost
 
                 # Update position
@@ -304,14 +311,9 @@ class BacktestEngine:
                 last_rebalance_time = current_time
                 transaction_costs_history[t] = action.transaction_cost
 
-            # Update P&L
-            # P&L = option premium - option value + hedge position value - transaction costs
-            hedge_value = current_position * spot_price
-            cumulative_pnl = initial_option_price - option_price + hedge_value - cumulative_costs
-
             # Store history
             position_history[t] = current_position
-            pnl_history[t] = cumulative_pnl
+            pnl_history[t] = current_pnl
 
         # Terminal statistics
         terminal_pnl = pnl_history[-1]
@@ -322,16 +324,13 @@ class BacktestEngine:
             option_type=self.market_config.option_type
         )
 
-        # Hedging error = |option payoff - hedged portfolio value|
-        # We sold the option and owe the payoff; our hedge should match it
-        final_hedge_value = current_position * terminal_spot
-        hedging_error = abs(terminal_option_payoff - final_hedge_value)
-
+        # Store terminal P&L
+        # Hedging error will be computed as std dev across all paths (not per-path)
         return PathResult(
             path_id=path_id,
             terminal_pnl=terminal_pnl,
             total_transaction_costs=cumulative_costs,
-            hedging_error=hedging_error,
+            hedging_error=0.0,  # Will be computed as std(P&L) in aggregate
             num_rebalances=num_rebalances,
             final_position=current_position,
             pnl_history=pnl_history,
@@ -361,9 +360,11 @@ class BacktestEngine:
 
         # Extract arrays
         all_pnls = np.array([r.terminal_pnl for r in path_results])
-        all_hedging_errors = np.array([r.hedging_error for r in path_results])
         all_transaction_costs = np.array([r.total_transaction_costs for r in path_results])
         all_num_rebalances = np.array([r.num_rebalances for r in path_results])
+
+        # Hedging error = std dev of P&L (measures hedge effectiveness)
+        hedging_error = float(np.std(all_pnls))
 
         # Calculate statistics
         return BacktestResults(
@@ -376,11 +377,11 @@ class BacktestEngine:
             median_pnl=float(np.median(all_pnls)),
             min_pnl=float(np.min(all_pnls)),
             max_pnl=float(np.max(all_pnls)),
-            # Hedging error stats
-            mean_hedging_error=float(np.mean(all_hedging_errors)),
-            std_hedging_error=float(np.std(all_hedging_errors)),
-            median_hedging_error=float(np.median(all_hedging_errors)),
-            max_hedging_error=float(np.max(all_hedging_errors)),
+            # Hedging error = std dev of P&L (lower is better)
+            mean_hedging_error=hedging_error,
+            std_hedging_error=0.0,  # Not applicable (hedging error IS the std)
+            median_hedging_error=0.0,  # Not applicable
+            max_hedging_error=0.0,  # Not applicable
             # Transaction costs
             mean_transaction_costs=float(np.mean(all_transaction_costs)),
             total_transaction_costs=float(np.sum(all_transaction_costs)),
@@ -389,7 +390,7 @@ class BacktestEngine:
             success_rate=float(np.mean(all_pnls > 0)),
             # Raw data
             all_pnls=all_pnls,
-            all_hedging_errors=all_hedging_errors,
+            all_hedging_errors=np.full(num_paths, hedging_error),  # Same for all paths
             all_transaction_costs=all_transaction_costs,
             path_results=path_results
         )
