@@ -67,14 +67,18 @@ class BlackScholesDeltaHedge(BaseHedgingStrategy):
         Returns:
             HedgeAction with target position and trade details
         """
-        # Calculate Black-Scholes delta
-        delta = self.bs_calculator.delta(
-            S=state.spot_price,
-            T=state.time_to_maturity
-        )
-
-        # Target position is the delta (number of shares to hold)
-        target_position = delta
+        # At expiration, close out the position
+        if state.time_to_maturity <= 1e-6:
+            target_position = 0.0
+            delta = 0.0
+        else:
+            # Calculate Black-Scholes delta
+            delta = self.bs_calculator.delta(
+                S=state.spot_price,
+                T=state.time_to_maturity
+            )
+            # Target position is the delta (number of shares to hold)
+            target_position = delta
 
         # Apply position limits
         target_position = self.enforce_position_limits(target_position)

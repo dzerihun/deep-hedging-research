@@ -1,14 +1,14 @@
 {
   "delta_hedge": {
-    "mean_pnl": 67.49747797204449,
-    "std_pnl": 49.44416734347272,
-    "mean_hedging_error": 67.49747797204449,
-    "mean_transaction_costs": 0.4531056001410656
+    "mean_pnl": -0.9606228859230143,
+    "std_pnl": 14.885812243421034,
+    "mean_hedging_error": 10.89246097363807,
+    "mean_transaction_costs": 0.5187454844705087
   },
   "no_hedge": {
     "mean_pnl": -0.44187740145250554,
     "std_pnl": 14.907805095662244,
-    "mean_hedging_error": 11.57421995340466,
+    "mean_hedging_error": 10.89246097363807,
     "mean_transaction_costs": 0.0
   }
 }

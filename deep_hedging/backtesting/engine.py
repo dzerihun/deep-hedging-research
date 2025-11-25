@@ -315,15 +315,17 @@ class BacktestEngine:
 
         # Terminal statistics
         terminal_pnl = pnl_history[-1]
+        terminal_spot = spot_path[-1]
         terminal_option_payoff = get_terminal_payoff(
-            spot_prices=spot_path[-1],
+            spot_prices=terminal_spot,
             strike=self.market_config.strike_price,
             option_type=self.market_config.option_type
         )
 
         # Hedging error = |option payoff - hedged portfolio value|
-        # We sold the option, so we owe the payoff
-        hedging_error = abs(terminal_pnl)
+        # We sold the option and owe the payoff; our hedge should match it
+        final_hedge_value = current_position * terminal_spot
+        hedging_error = abs(terminal_option_payoff - final_hedge_value)
 
         return PathResult(
             path_id=path_id,
