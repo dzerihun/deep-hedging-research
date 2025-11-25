@@ -1,0 +1,19 @@
+{
+  "market": {
+    "spot_price": 100.0,
+    "volatility": 0.2,
+    "risk_free_rate": 0.05,
+    "strike": 100.0,
+    "maturity": 1.0,
+    "option_type": "call"
+  },
+  "trading": {
+    "transaction_cost_pct": 0.001,
+    "rebalance_frequency": "daily"
+  },
+  "backtest": {
+    "num_paths": 1000,
+    "time_steps": 252,
+    "random_seed": 42
+  }
+}
