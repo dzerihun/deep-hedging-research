@@ -5,4 +5,8 @@ Provides custom Gymnasium environments and neural network architectures
 for deep hedging with RL.
 """
 
-__all__ = []
+from deep_hedging.agents.hedging_env import HedgingEnv
+
+__all__ = [
+    "HedgingEnv",
+]
