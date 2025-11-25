@@ -1,0 +1,88 @@
+# Default experiment configuration
+# This file demonstrates how to configure experiments using YAML
+
+name: default_experiment
+description: "Baseline experiment comparing delta hedging with deep RL hedging"
+random_seed: 42
+
+market:
+  spot_price: 100.0
+  volatility: 0.2
+  risk_free_rate: 0.05
+  dividend_yield: 0.0
+  strike_price: 100.0
+  time_to_maturity: 1.0
+  option_type: call
+  price_process: gbm
+
+trading:
+  transaction_cost_pct: 0.001  # 10 bps
+  transaction_cost_type: proportional
+  fixed_cost_per_trade: 0.0
+  rebalance_frequency: daily
+  rebalance_interval_days: null
+  max_position_size: null
+  allow_short_selling: true
+  slippage_pct: 0.0
+
+backtest:
+  num_paths: 1000
+  time_steps: 252  # Daily steps for 1 year
+  random_seed: 42
+  parallel: true
+  num_workers: -1
+  use_historical_data: false
+  historical_data_path: null
+
+agent:
+  algorithm: ppo
+  policy_type: MlpPolicy
+  hidden_layers: [256, 256]
+  activation_fn: relu
+  learning_rate: 0.0003
+  batch_size: 64
+  n_epochs: 10
+  gamma: 0.99
+  gae_lambda: 0.95
+  total_timesteps: 100000
+  ent_coef: 0.01
+  save_frequency: 10000
+  tensorboard_log: logs/tensorboard
+
+reward:
+  hedging_error_weight: 1.0
+  transaction_cost_weight: 1.0
+  risk_penalty_weight: 0.1
+  normalize_rewards: true
+  reward_scale: 1.0
+  use_var_penalty: false
+  var_alpha: 0.05
+
+metrics:
+  compute_sharpe: true
+  compute_sortino: true
+  compute_max_drawdown: true
+  compute_var: true
+  compute_cvar: true
+  risk_free_rate: 0.05
+  var_alpha: 0.05
+  compute_rolling_metrics: true
+  rolling_window_size: 50
+
+visualization:
+  style: seaborn
+  figure_size: [12, 8]
+  dpi: 100
+  save_format: png
+  plot_pnl_distribution: true
+  plot_hedging_error: true
+  plot_transaction_costs: true
+  plot_hedge_positions: true
+  plot_convergence: true
+  use_plotly: false
+
+output_dir: results/default_experiment
+log_dir: logs/default_experiment
+checkpoint_dir: checkpoints/default_experiment
+log_level: INFO
+verbose: true
