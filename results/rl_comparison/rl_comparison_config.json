@@ -1,0 +1,31 @@
+{
+  "market": {
+    "spot_price": 100.0,
+    "volatility": 0.2,
+    "risk_free_rate": 0.05,
+    "dividend_yield": 0.0,
+    "strike_price": 100.0,
+    "time_to_maturity": 1.0,
+    "option_type": "call",
+    "price_process": "gbm"
+  },
+  "trading": {
+    "transaction_cost_pct": 0.001,
+    "transaction_cost_type": "proportional",
+    "fixed_cost_per_trade": 0.0,
+    "rebalance_frequency": "daily",
+    "rebalance_interval_days": null,
+    "max_position_size": null,
+    "allow_short_selling": true,
+    "slippage_pct": 0.0
+  },
+  "backtest": {
+    "num_paths": 1000,
+    "time_steps": 252,
+    "random_seed": 42,
+    "parallel": true,
+    "num_workers": -1,
+    "use_historical_data": false,
+    "historical_data_path": null
+  }
+}

@@ -38,8 +38,9 @@ class HedgingEnv(gym.Env):
           Determines target hedge position as a fraction
 
     Reward:
-        - Per-step: -transaction_cost (penalize trading)
-        - Terminal: -hedging_error^2 (penalize poor hedge at expiration)
+        - Per-step: -0.01 * transaction_cost (light penalty for trading)
+        - Terminal: -10.0 * hedging_error^2 (moderate penalty for poor hedge at expiration)
+        - Ratio: Hedging error is 1,000x more important than transaction costs
 
     Episode:
         - One complete option lifetime (e.g., 252 days)
@@ -179,8 +180,8 @@ class HedgingEnv(gym.Env):
         self.cumulative_costs += transaction_cost
         self.current_position = target_ratio
 
-        # Reward: per-step transaction cost penalty
-        step_reward = -transaction_cost
+        # Reward: per-step transaction cost penalty (reduced weight)
+        step_reward = -0.01 * transaction_cost
 
         # Move to next step
         self.current_step += 1
@@ -190,10 +191,10 @@ class HedgingEnv(gym.Env):
         truncated = False
 
         if terminated:
-            # Terminal reward: penalize squared hedging error
+            # Terminal reward: penalize squared hedging error (moderate weight)
             terminal_pnl = self._calculate_terminal_pnl()
             hedging_error = abs(terminal_pnl)  # Distance from zero P&L
-            terminal_reward = -hedging_error ** 2 * 0.01  # Scale down to avoid huge values
+            terminal_reward = -10.0 * hedging_error ** 2  # Moderate penalty for hedging error
 
             reward = step_reward + terminal_reward
         else:

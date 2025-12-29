@@ -1,0 +1,15 @@
+{
+  "delta_hedge": {
+    "mean_pnl": 2.705276951161894,
+    "std_pnl": 1.3012514652197913,
+    "hedging_error": 1.3012514652197913,
+    "transaction_costs": 0.0
+  },
+  "rl_agent": {
+    "mean_pnl": -0.6701996095655127,
+    "std_pnl": 15.827823734252004,
+    "hedging_error": 15.827823734252004,
+    "transaction_costs": 0.0
+  },
+  "improvement_pct": -1116.353960575834
+}

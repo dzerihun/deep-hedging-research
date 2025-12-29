@@ -149,9 +149,46 @@ flake8 deep_hedging/ tests/ experiments/
 mypy deep_hedging/
 ```
 
-## Results
+## Key Findings
 
-Results and analysis will be stored in the `results/` directory with timestamped experiment runs. Visualizations and comparative analysis can be found in the `notebooks/` directory.
+This research systematically compares deep reinforcement learning (PPO) against Black-Scholes delta hedging for options hedging under transaction costs.
+
+### Main Results
+
+| Strategy | Transaction Cost | Hedging Error | Performance |
+|----------|------------------|---------------|-------------|
+| **Delta Hedging** | 10 bps | **$1.33** | ✅ Excellent |
+| **Delta Hedging** | 0 bps | **$1.30** | ✅ Excellent |
+| **PPO-RL (Naive)** | 10 bps | $17.29 | ❌ 13x worse |
+| **PPO-RL (Tuned)** | 10 bps | $15.10 | ❌ 11x worse |
+| **PPO-RL (Zero Cost)** | 0 bps | $15.83 | ❌ 12x worse |
+
+### Critical Observations
+
+1. **Delta hedging is highly robust**: Achieves $1.30-$1.33 hedging error across all transaction cost levels
+2. **Vanilla PPO fails to learn hedging**: All RL configurations perform 11-13x worse than delta
+3. **Failure is fundamental, not about costs**: Even at zero transaction costs, RL achieves $15.83 vs delta's $1.30
+4. **Root causes identified**: Sparse terminal rewards, insufficient state representation, inadequate exploration
+
+### Detailed Analysis
+
+See [paper/research_findings.md](paper/research_findings.md) for comprehensive analysis including:
+- Experimental methodology and setup
+- Detailed results for all experiments
+- Root cause analysis of RL failures
+- Lessons learned and future directions
+- Complete reproducibility information
+
+### Value of Negative Results
+
+While the RL agents failed to beat delta hedging, this research contributes:
+- **Rigorous benchmarks** for future RL hedging research
+- **Documentation of failure modes** to help others avoid similar pitfalls
+- **Professional infrastructure** (backtesting, logging, configuration)
+- **Systematic methodology** (multiple reward functions, zero-cost validation)
+- **Open-source implementation** for community building
+
+**Conclusion**: Vanilla PPO with standard reward shaping is insufficient for options hedging. Future work should explore dense rewards, curriculum learning, and alternative algorithms (SAC/TD3).
 
 ## Contributing
 
